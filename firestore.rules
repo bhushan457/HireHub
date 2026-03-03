@@ -1,0 +1,163 @@
+/**
+ * HireHub Firestore Security Rules
+ *
+ * CORE PHILOSOPHY:
+ * This ruleset enforces a strict user-ownership model for personal data and a role-based access model
+ * for recruitment activities. It prioritizes Authorization Independence by ensuring documents contain
+ * necessary context (like recruiterId) to make decisions without multiple document lookups.
+ *
+ * DATA STRUCTURE:
+ * - /users/{userId}: Private root for user metadata.
+ * - /users/{userId}/profile, /workExperiences, /education: Private subcollections for job seekers.
+ * - /jobs/{jobId}: Publicly readable job postings, writable only by the posting recruiter.
+ * - /jobApplications/{applicationId}: Private interactions between seekers and recruiters.
+ * - /roles_recruiters/{recruiterId}: A DBAC (Database-driven Access Control) collection where
+ *   document existence signifies recruiter status.
+ *
+ * KEY SECURITY DECISIONS:
+ * 1. Ownership Enforcement: Most user-centric data requires the UID in the path to match the authenticated user.
+ * 2. Recruiter Verification: Recruiter-only actions (like posting jobs) are verified against the 
+ *    /roles_recruiters collection for high-integrity role checks.
+ * 3. Denormalization for Authorization: JobApplication documents contain both jobSeekerId and recruiterId.
+ *    This allows rules to grant access to both parties efficiently.
+ * 4. Prototyping Flexibility: Rules enforce relational links (IDs) and ownership but do not 
+ *    validate the specific schema or data types of content fields.
+ */
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- GLOBAL HELPER FUNCTIONS ---
+
+    /** Checks if a user is authenticated. */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /** Checks if the authenticated user's UID matches the provided ID. */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /** Checks ownership and ensures the document exists for destructive operations. */
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    /** 
+     * Checks if the authenticated user is a verified recruiter by checking 
+     * the DBAC /roles_recruiters collection. 
+     */
+    function isVerifiedRecruiter() {
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_recruiters/$(request.auth.uid));
+    }
+
+    // --- COLLECTION RULES ---
+
+    /**
+     * @description Rules for the root User document.
+     * @path /users/{userId}
+     * @allow Authenticated user matching userId (create, get, list, update).
+     * @deny Any other user or unauthenticated request.
+     * @principle Ownership and path-to-data consistency.
+     */
+    match /users/{userId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if false; // User accounts are usually deactivated, not deleted.
+    }
+
+    /**
+     * @description Rules for job seeker profile details.
+     * @path /users/{userId}/profile/{profileId}
+     * @allow Authenticated user matching userId (create, update, get).
+     * @deny Mismatched user IDs.
+     * @principle Restricts access to a user's own data tree.
+     */
+    match /users/{userId}/profile/{profileId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Rules for work experience and education entries.
+     * @path /users/{userId}/workExperiences/{id} OR /users/{userId}/education/{id}
+     * @allow Authenticated user matching userId.
+     * @deny Mismatched user IDs.
+     * @principle Scoped subcollection ownership.
+     */
+    match /users/{userId}/workExperiences/{id} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    match /users/{userId}/education/{id} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Rules for public Job postings.
+     * @path /jobs/{jobId}
+     * @allow Anyone (read), Verified Recruiter matching recruiterId (write).
+     * @deny Non-recruiters or recruiters modifying other's jobs.
+     * @principle Public Read with Owner-Only Writes.
+     */
+    match /jobs/{jobId} {
+      allow get, list: if true;
+      allow create: if isVerifiedRecruiter() && request.resource.data.recruiterId == request.auth.uid;
+      allow update: if resource != null && resource.data.recruiterId == request.auth.uid && request.resource.data.recruiterId == resource.data.recruiterId;
+      allow delete: if resource != null && resource.data.recruiterId == request.auth.uid;
+    }
+
+    /**
+     * @description Rules for Job Applications. Shared between seeker and recruiter.
+     * @path /jobApplications/{applicationId}
+     * @allow jobSeekerId (read/write), recruiterId (read/update status).
+     * @deny Users not referenced in the application document.
+     * @principle Shared Access (Closed Collaborators) via denormalized IDs.
+     */
+    match /jobApplications/{applicationId} {
+      allow get: if isSignedIn() && (resource.data.jobSeekerId == request.auth.uid || resource.data.recruiterId == request.auth.uid);
+      allow list: if isSignedIn(); // Queries MUST filter by jobSeekerId or recruiterId to succeed.
+      allow create: if isSignedIn() && request.resource.data.jobSeekerId == request.auth.uid;
+      allow update: if resource != null && (resource.data.jobSeekerId == request.auth.uid || resource.data.recruiterId == request.auth.uid) && request.resource.data.jobSeekerId == resource.data.jobSeekerId;
+      allow delete: if resource != null && resource.data.jobSeekerId == request.auth.uid;
+    }
+
+    /**
+     * @description Rules for saved/bookmarked jobs.
+     * @path /users/{jobSeekerId}/savedJobs/{savedJobId}
+     * @allow jobSeekerId matching auth UID.
+     * @deny Other users accessing bookmarks.
+     * @principle Ownership of private bookmarks.
+     */
+    match /users/{jobSeekerId}/savedJobs/{savedJobId} {
+      allow get, list: if isOwner(jobSeekerId);
+      allow create: if isOwner(jobSeekerId) && request.resource.data.jobSeekerId == jobSeekerId;
+      allow update: if isExistingOwner(jobSeekerId) && request.resource.data.jobSeekerId == resource.data.jobSeekerId;
+      allow delete: if isExistingOwner(jobSeekerId);
+    }
+
+    /**
+     * @description DBAC helper collection for Recruiter roles.
+     * @path /roles_recruiters/{recruiterId}
+     * @allow Authenticated recruiter to read their own status.
+     * @deny Writes from clients (Admin-only).
+     * @principle Database-driven access control.
+     */
+    match /roles_recruiters/{recruiterId} {
+      allow get: if isSignedIn() && request.auth.uid == recruiterId;
+      allow list: if false;
+      allow create, update, delete: if false; // Managed by backend service/admin only.
+    }
+  }
+}

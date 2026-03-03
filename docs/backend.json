@@ -1,0 +1,633 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user in the HireHub application, capable of being a job seeker or a recruiter. Authentication details are handled by an external system.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address, used for communication and identification.",
+          "format": "email"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The user's first name."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The user's last name."
+        },
+        "role": {
+          "type": "string",
+          "description": "The role of the user within the application (JobSeeker or Recruiter).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the user account was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the user account was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "firstName",
+        "lastName",
+        "role",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Stores specific profile details for job seekers, complementing their basic User information.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserProfile entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the associated User. (Relationship: User 1:1 UserProfile)"
+        },
+        "bio": {
+          "type": "string",
+          "description": "A short biographical summary provided by the job seeker."
+        },
+        "skills": {
+          "type": "array",
+          "description": "A list of skills possessed by the job seeker.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "resumeLink": {
+          "type": "string",
+          "description": "A URL link to the job seeker's resume.",
+          "format": "uri"
+        },
+        "portfolioLink": {
+          "type": "string",
+          "description": "An optional URL link to the job seeker's online portfolio.",
+          "format": "uri"
+        },
+        "linkedinProfile": {
+          "type": "string",
+          "description": "An optional URL link to the job seeker's LinkedIn profile.",
+          "format": "uri"
+        },
+        "githubProfile": {
+          "type": "string",
+          "description": "An optional URL link to the job seeker's GitHub profile.",
+          "format": "uri"
+        },
+        "experienceIds": {
+          "type": "array",
+          "description": "References to WorkExperience entities associated with this profile. (Relationship: UserProfile 1:N WorkExperience)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "educationIds": {
+          "type": "array",
+          "description": "References to Education entities associated with this profile. (Relationship: UserProfile 1:N Education)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the user profile was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the user profile was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "bio",
+        "skills",
+        "resumeLink",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "WorkExperience": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "WorkExperience",
+      "type": "object",
+      "description": "Represents a single work experience entry for a job seeker's profile.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the WorkExperience entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User this work experience belongs to. (Relationship: User 1:N WorkExperience)"
+        },
+        "title": {
+          "type": "string",
+          "description": "The job title held during this experience."
+        },
+        "company": {
+          "type": "string",
+          "description": "The company where this experience took place."
+        },
+        "location": {
+          "type": "string",
+          "description": "The location of the company or work."
+        },
+        "startDate": {
+          "type": "string",
+          "description": "The start date of this work experience.",
+          "format": "date"
+        },
+        "endDate": {
+          "type": "string",
+          "description": "The end date of this work experience (optional if current).",
+          "format": "date"
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of responsibilities and achievements in this role."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when this work experience entry was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when this work experience entry was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "title",
+        "company",
+        "location",
+        "startDate",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Education": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Education",
+      "type": "object",
+      "description": "Represents a single education entry for a job seeker's profile.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Education entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User this education entry belongs to. (Relationship: User 1:N Education)"
+        },
+        "degree": {
+          "type": "string",
+          "description": "The degree or qualification obtained."
+        },
+        "institution": {
+          "type": "string",
+          "description": "The educational institution attended."
+        },
+        "fieldOfStudy": {
+          "type": "string",
+          "description": "The main field of study or major."
+        },
+        "startDate": {
+          "type": "string",
+          "description": "The start date of the education period.",
+          "format": "date"
+        },
+        "endDate": {
+          "type": "string",
+          "description": "The end date of the education period (optional if ongoing).",
+          "format": "date"
+        },
+        "description": {
+          "type": "string",
+          "description": "Additional details about the education, such as honors or coursework."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when this education entry was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when this education entry was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "degree",
+        "institution",
+        "fieldOfStudy",
+        "startDate",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Job": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Job",
+      "type": "object",
+      "description": "Represents a job posting created by a recruiter.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Job entity."
+        },
+        "recruiterId": {
+          "type": "string",
+          "description": "Reference to the User who posted this job. (Relationship: User 1:N Job)"
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the job posting."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the job, responsibilities, and company."
+        },
+        "location": {
+          "type": "string",
+          "description": "The geographical location of the job."
+        },
+        "salaryMin": {
+          "type": "number",
+          "description": "The minimum expected annual salary for the position."
+        },
+        "salaryMax": {
+          "type": "number",
+          "description": "The maximum expected annual salary for the position."
+        },
+        "currency": {
+          "type": "string",
+          "description": "The currency in which the salary is paid (e.g., 'USD', 'EUR')."
+        },
+        "requirements": {
+          "type": "array",
+          "description": "A list of required qualifications, skills, and experiences.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "responsibilities": {
+          "type": "array",
+          "description": "A list of key responsibilities for the role.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "skillsRequired": {
+          "type": "array",
+          "description": "A list of specific skills necessary for the job.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "jobType": {
+          "type": "string",
+          "description": "The type of employment (e.g., Full-time, Part-time, Contract).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "experienceLevel": {
+          "type": "string",
+          "description": "The required experience level for the position (e.g., Entry-level, Mid-level, Senior).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the job posting (e.g., Open, Closed).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "postedDate": {
+          "type": "string",
+          "description": "Timestamp when the job was originally posted.",
+          "format": "date-time"
+        },
+        "applicationDeadline": {
+          "type": "string",
+          "description": "The deadline for submitting applications for this job.",
+          "format": "date"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the job entity was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the job entity was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "recruiterId",
+        "title",
+        "description",
+        "location",
+        "requirements",
+        "responsibilities",
+        "skillsRequired",
+        "jobType",
+        "experienceLevel",
+        "status",
+        "postedDate",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "JobApplication": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "JobApplication",
+      "type": "object",
+      "description": "Represents a job seeker's application to a specific job posting.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the JobApplication entity."
+        },
+        "jobSeekerId": {
+          "type": "string",
+          "description": "Reference to the User (job seeker) who submitted the application. (Relationship: User 1:N JobApplication)"
+        },
+        "jobId": {
+          "type": "string",
+          "description": "Reference to the Job for which the application was submitted. (Relationship: Job 1:N JobApplication)"
+        },
+        "coverLetter": {
+          "type": "string",
+          "description": "The cover letter submitted with the application."
+        },
+        "resumeLink": {
+          "type": "string",
+          "description": "A URL link to the resume submitted with this specific application. Can be different from profile resume.",
+          "format": "uri"
+        },
+        "applicationDate": {
+          "type": "string",
+          "description": "Timestamp when the application was submitted.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the job application (e.g., Pending, Reviewed, Interview Scheduled, Offer Extended, Rejected, Withdrawn).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the job application entity was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the job application entity was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "jobSeekerId",
+        "jobId",
+        "coverLetter",
+        "resumeLink",
+        "applicationDate",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "SavedJob": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "SavedJob",
+      "type": "object",
+      "description": "Represents a job that a job seeker has saved or bookmarked for later consideration.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the SavedJob entity."
+        },
+        "jobSeekerId": {
+          "type": "string",
+          "description": "Reference to the User (job seeker) who saved the job. (Relationship: User 1:N SavedJob)"
+        },
+        "jobId": {
+          "type": "string",
+          "description": "Reference to the Job that was saved. (Relationship: Job 1:N SavedJob)"
+        },
+        "savedDate": {
+          "type": "string",
+          "description": "Timestamp when the job was saved by the job seeker.",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the saved job entity was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the saved job entity was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "jobSeekerId",
+        "jobId",
+        "savedDate",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores basic user information. Access is restricted to the authenticated user matching `userId`. Includes `role` for general identification.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique ID of the user, matching `request.auth.uid`."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/profile",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores job seeker specific profile details. The `userId` matches the parent `User` and is explicitly stored in the document for authorization independence. Access is restricted to the authenticated user matching `userId`.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique ID of the user, matching `request.auth.uid`."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/workExperiences/{workExperienceId}",
+        "definition": {
+          "entityName": "WorkExperience",
+          "schema": {
+            "$ref": "#/backend/entities/WorkExperience"
+          },
+          "description": "Stores individual work experience entries for a job seeker. The `userId` matches the parent `User` and is explicitly stored in the document for authorization independence. Access is restricted to the authenticated user matching `userId`.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique ID of the user, matching `request.auth.uid`."
+            },
+            {
+              "name": "workExperienceId",
+              "description": "The unique ID of the work experience entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/education/{educationId}",
+        "definition": {
+          "entityName": "Education",
+          "schema": {
+            "$ref": "#/backend/entities/Education"
+          },
+          "description": "Stores individual education entries for a job seeker. The `userId` matches the parent `User` and is explicitly stored in the document for authorization independence. Access is restricted to the authenticated user matching `userId`.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique ID of the user, matching `request.auth.uid`."
+            },
+            {
+              "name": "educationId",
+              "description": "The unique ID of the education entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/jobs/{jobId}",
+        "definition": {
+          "entityName": "Job",
+          "schema": {
+            "$ref": "#/backend/entities/Job"
+          },
+          "description": "Stores public job postings. All users can read and list these jobs. Only the `recruiterId` (explicitly stored in the document) can create, update, or delete their specific job posting.",
+          "params": [
+            {
+              "name": "jobId",
+              "description": "The unique ID of the job posting."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/jobApplications/{applicationId}",
+        "definition": {
+          "entityName": "JobApplication",
+          "schema": {
+            "$ref": "#/backend/entities/JobApplication"
+          },
+          "description": "Stores individual job applications. The document includes `jobSeekerId`, `jobId`, and a denormalized `recruiterId` (from the associated Job) for authorization independence. A job seeker can read/write their own application. The associated recruiter can read/update the status of applications to their jobs.",
+          "params": [
+            {
+              "name": "applicationId",
+              "description": "The unique ID of the job application."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{jobSeekerId}/savedJobs/{savedJobId}",
+        "definition": {
+          "entityName": "SavedJob",
+          "schema": {
+            "$ref": "#/backend/entities/SavedJob"
+          },
+          "description": "Stores jobs saved by job seekers. The `jobSeekerId` matches the parent user and is explicitly stored in the document, along with `jobId`, for authorization independence. Only the `jobSeekerId` can read or delete their saved jobs.",
+          "params": [
+            {
+              "name": "jobSeekerId",
+              "description": "The unique ID of the job seeker, matching `request.auth.uid`."
+            },
+            {
+              "name": "savedJobId",
+              "description": "The unique ID of the saved job entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_recruiters/{recruiterId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "A collection used for explicit, database-driven access control. The mere existence of a document at `/roles_recruiters/{recruiterId}` signifies that the user with `recruiterId` has the 'Recruiter' role. This is used by security rules for efficient role checks.",
+          "params": [
+            {
+              "name": "recruiterId",
+              "description": "The unique ID of the user who is a recruiter, matching `request.auth.uid`."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure for HireHub is designed following the core principles of Authorization Independence, Structural Segregation, and consistent Access Modeling. This approach ensures robust, scalable, and easily debuggable security rules.\n\n**Authorization Independence via Denormalization:**\nEach document contains all necessary authorization context, eliminating the need for `get()` operations in security rules, which are critical for atomic operations and rule clarity. For instance:\n*   `UserProfile`, `WorkExperience`, and `Education` documents are stored as subcollections under `/users/{userId}`, and importantly, each document explicitly includes the `userId` field. This ensures that a rule evaluating `request.auth.uid == resource.data.userId` is self-contained.\n*   `Job` documents explicitly include the `recruiterId` to allow direct authorization for job management (create, update, delete) without fetching the recruiter's role from a separate path.\n*   `JobApplication` documents are crucial for both job seekers and recruiters. To achieve authorization independence for both parties, each `JobApplication` document explicitly includes `jobSeekerId`, `jobId`, and critically, the `recruiterId` (denormalized from the associated Job document). This allows rules to check `request.auth.uid == resource.data.jobSeekerId` for job seekers or `request.auth.uid == resource.data.recruiterId` for recruiters, directly within the application document, avoiding cross-document `get()` calls.\n*   `SavedJob` documents similarly contain `jobSeekerId` and `jobId` for direct ownership checks.\n\n**Structural Segregation (Homogeneous Security Posture):**\nCollections are structured to group documents with similar security requirements:\n*   `/users/{userId}/...` paths are used for highly private, user-owned data (`profile`, `workExperiences`, `education`, `savedJobs`). Access to these is strictly limited to the `userId` in the path (which matches `request.auth.uid`).\n*   `/jobs` is a top-level collection. Jobs are publicly browsable, but only the `recruiterId` specified within each job document can modify it. This clear separation makes `list` operations for job browsing simple and secure.\n*   `/jobApplications` is a top-level collection. While it contains user-specific data, making it top-level facilitates efficient querying for both job seekers (listing their applications by `jobSeekerId`) and recruiters (listing applications for their jobs by `recruiterId`). Segregating applications from jobs themselves ensures that application logic doesn't complicate job browsing rules.\n*   `/roles_recruiters/{recruiterId}` serves as an explicit, database-driven access control (DBAC) mechanism. The mere existence of a document in this collection signifies that `recruiterId` possesses the recruiter role, providing a direct and efficient check for security rules without relying on potentially mutable fields within a user's main profile or custom claims.\n\n**QAPs (Queryable Authorization Patterns):**\nThis structure directly supports the required query and list operations with simple, secure rules:\n*   **Browse all jobs:** `allow read: if true;` on `/jobs` for publicly viewable jobs. Rules will further restrict `write` to `resource.data.recruiterId == request.auth.uid`.\n*   **View applied jobs (Job Seeker):** A job seeker can `list` applications from `/jobApplications` with a query `where('jobSeekerId', '==', request.auth.uid)`. The rule would be `allow list: if request.auth.uid == resource.data.jobSeekerId;` (after an initial `match /jobApplications/{applicationId}`).\n*   **View applicants for each job (Recruiter):** A recruiter can `list` applications from `/jobApplications` with a query `where('recruiterId', '==', request.auth.uid)`. The rule would be `allow list: if request.auth.uid == resource.data.recruiterId;`.\n*   **Save/Bookmark jobs (Job Seeker):** A job seeker can `list` their saved jobs from `/users/{jobSeekerId}/savedJobs` with `request.auth.uid == jobSeekerId` in the path.\n\nThis design prioritizes explicit ownership, consistent authorization fields, and structural segregation to simplify security rules, enhance debuggability, and maintain data integrity, addressing the core requirements for a production-ready job portal."
+  }
+}
