@@ -157,7 +157,9 @@ export default function JobsPage() {
                   <p className="text-sm text-primary-foreground/80 leading-relaxed">
                     Based on your skills in <b>React, TypeScript and Tailwind</b>, we found 12 jobs that match your profile perfectly.
                   </p>
-                  <Button variant="secondary" className="w-full">Improve My Profile</Button>
+                  <Link href="/profile">
+                    <Button variant="secondary" className="w-full">Improve My Profile</Button>
+                  </Link>
                 </CardContent>
               </Card>
 

@@ -6,7 +6,6 @@ import { Navbar } from '@/components/layout/navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { 
   MapPin, 
   Building2, 
@@ -19,12 +18,15 @@ import {
   ChevronRight,
   Share2,
   Bookmark,
-  Users
+  Users,
+  Loader2
 } from 'lucide-react';
 import { MOCK_JOBS } from '@/lib/mock-data';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
 
 export default function JobDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -32,10 +34,38 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
   const { toast } = useToast();
   const [applying, setApplying] = useState(false);
   
-  const job = MOCK_JOBS.find(j => j.id === id);
+  const firestore = useFirestore();
+  const jobRef = useMemoFirebase(() => doc(firestore, 'jobs', id), [firestore, id]);
+  const { data: firestoreJob, isLoading } = useDoc(jobRef);
+  
+  // Use firestore job if found, else fallback to mock for prototype
+  const job = firestoreJob || MOCK_JOBS.find(j => j.id === id);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="container mx-auto px-4 py-24 flex flex-col items-center justify-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary opacity-20" />
+          <p className="mt-4 text-muted-foreground font-medium">Loading job details...</p>
+        </main>
+      </div>
+    );
+  }
 
   if (!job) {
-    return <div>Job not found</div>;
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="container mx-auto px-4 py-24 text-center">
+          <h2 className="text-2xl font-bold">Job not found</h2>
+          <p className="text-muted-foreground mt-2">The position you are looking for may have been removed.</p>
+          <Link href="/jobs">
+            <Button className="mt-8">Browse Other Jobs</Button>
+          </Link>
+        </main>
+      </div>
+    );
   }
 
   const handleApply = () => {
@@ -121,22 +151,19 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
                   <p className="text-muted-foreground leading-relaxed">
                     {job.description}
                   </p>
-                  <p className="text-muted-foreground leading-relaxed mt-4">
-                    As a {job.title} at {job.company}, you will play a pivotal role in shaping our user experience. 
-                    We are looking for someone who is passionate about building high-quality software and has a strong foundation in modern frontend technologies.
-                  </p>
                   
-                  <h3 className="text-xl font-bold mt-8 mb-4">Key Responsibilities</h3>
-                  <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
-                    <li>Design and implement user-facing features using React and TypeScript.</li>
-                    <li>Collaborate with cross-functional teams to define, design, and ship new features.</li>
-                    <li>Optimize applications for maximum speed and scalability.</li>
-                    <li>Ensure high-quality graphic standards and brand consistency.</li>
-                  </ul>
+                  {job.requirements && job.requirements.length > 0 && (
+                    <>
+                      <h3 className="text-xl font-bold mt-8 mb-4">Requirements</h3>
+                      <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+                        {job.requirements.map((req, i) => <li key={i}>{req}</li>)}
+                      </ul>
+                    </>
+                  )}
 
-                  <h3 className="text-xl font-bold mt-8 mb-4">What We're Looking For</h3>
+                  <h3 className="text-xl font-bold mt-8 mb-4">Skills Required</h3>
                   <div className="flex flex-wrap gap-2">
-                    {job.skills.map((skill, i) => (
+                    {job.skills?.map((skill, i) => (
                       <Badge key={i} variant="secondary" className="px-3 py-1 font-medium bg-primary/10 text-primary border-none">{skill}</Badge>
                     ))}
                   </div>
