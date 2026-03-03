@@ -7,7 +7,7 @@ import { Briefcase, User, LayoutDashboard, LogOut, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { MOCK_USER, MOCK_RECRUITER } from '@/lib/mock-data';
+import { MOCK_USER } from '@/lib/mock-data';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -19,8 +19,8 @@ export function Navbar() {
 
   const navItems = isRecruiter 
     ? [
-        { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-        { name: 'My Jobs', href: '/my-jobs', icon: Briefcase },
+        { name: 'Dashboard', href: '/recruiter/dashboard', icon: LayoutDashboard },
+        { name: 'My Jobs', href: '/recruiter/dashboard', icon: Briefcase }, // Pointing to dashboard until specific listings page is built
       ]
     : [
         { name: 'Browse Jobs', href: '/jobs', icon: Briefcase },

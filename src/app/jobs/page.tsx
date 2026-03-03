@@ -5,20 +5,30 @@ import { useState } from 'react';
 import { Navbar } from '@/components/layout/navbar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, MapPin, Building2, Clock, Filter, Briefcase, ChevronRight } from 'lucide-react';
+import { Search, MapPin, Building2, Clock, Filter, Briefcase, ChevronRight, Sparkles } from 'lucide-react';
 import { MOCK_JOBS } from '@/lib/mock-data';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { collection } from 'firebase/firestore';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 
 export default function JobsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeType, setActiveType] = useState('All');
+  
+  const firestore = useFirestore();
+  const jobsQuery = useMemoFirebase(() => collection(firestore, 'jobs'), [firestore]);
+  const { data: firestoreJobs, isLoading: isJobsLoading } = useCollection(jobsQuery);
 
-  const filteredJobs = MOCK_JOBS.filter(job => {
-    const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          job.company.toLowerCase().includes(searchQuery.toLowerCase());
+  // Combine Firestore data with MOCK_JOBS for initial prototype feel
+  const allJobs = firestoreJobs && firestoreJobs.length > 0 ? firestoreJobs : MOCK_JOBS;
+
+  const filteredJobs = allJobs.filter(job => {
+    const titleMatch = job.title?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false;
+    const companyMatch = job.company?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false;
+    const matchesSearch = titleMatch || companyMatch;
     const matchesType = activeType === 'All' || job.type === activeType;
     return matchesSearch && matchesType;
   });
@@ -74,7 +84,9 @@ export default function JobsPage() {
           <div className="grid lg:grid-cols-12 gap-8">
             <div className="lg:col-span-8 space-y-4">
               <div className="flex items-center justify-between mb-2">
-                <h2 className="text-xl font-bold">Showing {filteredJobs.length} Jobs</h2>
+                <h2 className="text-xl font-bold">
+                  {isJobsLoading ? 'Loading...' : `Showing ${filteredJobs.length} Jobs`}
+                </h2>
                 <div className="text-sm text-muted-foreground">
                   Sorted by: <span className="font-medium text-primary cursor-pointer">Newest</span>
                 </div>
@@ -107,7 +119,7 @@ export default function JobsPage() {
                             </div>
 
                             <div className="flex flex-wrap gap-2 pt-2">
-                              {job.skills.map((skill, i) => (
+                              {job.skills?.map((skill, i) => (
                                 <Badge key={i} variant="outline" className="font-normal text-[11px] h-5">{skill}</Badge>
                               ))}
                             </div>

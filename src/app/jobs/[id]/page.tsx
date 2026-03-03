@@ -18,7 +18,8 @@ import {
   Calendar,
   ChevronRight,
   Share2,
-  Bookmark
+  Bookmark,
+  Users
 } from 'lucide-react';
 import { MOCK_JOBS } from '@/lib/mock-data';
 import Link from 'next/link';
@@ -177,11 +178,11 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">About TechCorp</CardTitle>
+                  <CardTitle className="text-lg">About {job.company}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    TechCorp is a leading global technology company focused on digital transformation and innovative software solutions.
+                    {job.company} is a leading global technology company focused on digital transformation and innovative software solutions.
                   </p>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 text-sm">
