@@ -1,0 +1,23 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-job",
+      "description": "Professional workspace with laptop and coffee",
+      "imageUrl": "https://images.unsplash.com/photo-1497215728101-856f4ea42174?q=80&w=1200&h=600&auto=format&fit=crop",
+      "imageHint": "office workspace"
+    },
+    {
+      "id": "recruiter-avatar",
+      "description": "Professional recruiter portrait",
+      "imageUrl": "https://picsum.photos/seed/recruiter1/100/100",
+      "imageHint": "professional person"
+    },
+    {
+      "id": "company-logo-1",
+      "description": "Generic modern tech company logo",
+      "imageUrl": "https://picsum.photos/seed/company1/80/80",
+      "imageHint": "company logo"
+    }
+  ]
+}
